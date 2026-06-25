@@ -1,0 +1,49 @@
+# DevHive GoReleaser Configuration
+# Builds cross-platform binaries for Linux and macOS.
+
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: dh
+    main: ./cmd/dh
+    binary: dh
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+
+archives:
+  - format: tar.gz
+    name_template: "devhive-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    files:
+      - config.yaml
+      - install.sh
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+
+release:
+  github:
+    owner: Oswald-Hao
+    name: devhive

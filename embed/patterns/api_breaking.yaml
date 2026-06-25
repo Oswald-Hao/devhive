@@ -1,0 +1,25 @@
+# API breaking change detection rules
+patterns:
+  - id: P001
+    name: public_api_break
+    desc: "Public function signature changed but callers not updated in this diff"
+    severity: HIGH
+    detector:
+      type: ast_diff
+      rule: "function signature changed AND call sites unchanged"
+
+  - id: P002
+    name: removed_public_symbol
+    desc: "Public class/function/module removed without deprecation period"
+    severity: HIGH
+    detector:
+      type: ast_diff
+      rule: "public symbol removed AND no deprecation warning added"
+
+  - id: P003
+    name: return_type_changed
+    desc: "Function return type changed — may break downstream consumers"
+    severity: HIGH
+    detector:
+      type: ast_diff
+      rule: "return type annotation changed AND callers not updated"

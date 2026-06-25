@@ -1,0 +1,38 @@
+{
+  "name": "@oswaldzsh/devhive",
+  "version": "0.2.0",
+  "description": "Multi-Agent Software Development System — autonomous coding with verify-specialized agents, failure signatures, and structured handoff protocols.",
+  "keywords": [
+    "ai",
+    "agent",
+    "coding",
+    "devtool",
+    "multi-agent",
+    "orchestration",
+    "verification",
+    "autonomous",
+    "go"
+  ],
+  "homepage": "https://github.com/Oswald-Hao/devhive",
+  "license": "MIT",
+  "bin": {
+    "dh": "bin/dh"
+  },
+  "files": [
+    "bin/",
+    "install.sh",
+    "config.yaml"
+  ],
+  "scripts": {
+    "postinstall": "bash install.sh || echo 'DevHive: Install failed. You can manually run: bash $(npm root -g)/@oswaldzsh/devhive/install.sh'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Oswald-Hao/devhive.git"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "os": ["darwin", "linux"],
+  "preferGlobal": true
+}

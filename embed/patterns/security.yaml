@@ -1,0 +1,41 @@
+# Security-related detection rules
+patterns:
+  - id: S001
+    name: new_network_call_no_timeout
+    desc: "New network request added without timeout or deadline context"
+    severity: HIGH
+    detector:
+      type: ast_pattern
+      rule: "new http/client call AND no timeout/deadline context"
+
+  - id: S002
+    name: sql_injection_risk
+    desc: "String formatting or concatenation used in SQL query construction"
+    severity: CRITICAL
+    detector:
+      type: ast_pattern
+      rule: "SQL string built with f-string or .format() instead of parameterized query"
+
+  - id: S003
+    name: hardcoded_secret
+    desc: "Potential hardcoded credential, API key, or token"
+    severity: CRITICAL
+    detector:
+      type: pattern_match
+      rule: "string literal matching secret/key/token/password patterns"
+
+  - id: S004
+    name: missing_auth_check
+    desc: "New endpoint or handler added without authentication decorator"
+    severity: HIGH
+    detector:
+      type: ast_pattern
+      rule: "new route/endpoint handler without auth middleware"
+
+  - id: S005
+    name: unsafe_deserialization
+    desc: "Use of pickle, yaml.load, or eval on user-controlled input"
+    severity: CRITICAL
+    detector:
+      type: ast_pattern
+      rule: "pickle.loads|yaml.load|eval|exec with variable input"

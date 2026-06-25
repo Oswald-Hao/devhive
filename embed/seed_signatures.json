@@ -1,0 +1,174 @@
+{
+  "signatures": [
+    {
+      "signature_id": "sig-seed-001",
+      "created_at": "2026-01-01T00:00:00",
+      "last_matched": "2026-01-01T00:00:00",
+      "match_count": 0,
+      "feature_vector": {
+        "error_type": "AttributeError",
+        "error_message_hash": "abc123def456",
+        "error_location_pattern": "",
+        "stack_trace_signature": [],
+        "change_context": {
+          "files_touched": [],
+          "change_types": ["refactor"],
+          "distance_to_error": "SAME_FILE"
+        },
+        "temporal": {
+          "is_new_in_this_diff": true,
+          "frequency_30d": 0
+        }
+      },
+      "diagnosis": {
+        "root_cause": "属性/方法重命名后，调用方未同步更新",
+        "root_cause_category": "refactor",
+        "reliability": 0.7
+      },
+      "resolution": {
+        "strategy": "FIX_AND_RETEST",
+        "fix_template": "检查所有调用方，将旧的属性/方法名更新为新名称",
+        "verification_required": [
+          "搜索旧方法名的所有引用，确认已全部更新",
+          "运行受影响的测试"
+        ]
+      }
+    },
+    {
+      "signature_id": "sig-seed-002",
+      "created_at": "2026-01-01T00:00:00",
+      "last_matched": "2026-01-01T00:00:00",
+      "match_count": 0,
+      "feature_vector": {
+        "error_type": "ImportError",
+        "error_message_hash": "def456ghi789",
+        "error_location_pattern": "",
+        "stack_trace_signature": [],
+        "change_context": {
+          "files_touched": [],
+          "change_types": ["dependency"],
+          "distance_to_error": "SAME_FILE"
+        },
+        "temporal": {
+          "is_new_in_this_diff": true,
+          "frequency_30d": 0
+        }
+      },
+      "diagnosis": {
+        "root_cause": "缺少依赖或依赖版本不兼容",
+        "root_cause_category": "dependency",
+        "reliability": 0.8
+      },
+      "resolution": {
+        "strategy": "FIX_AND_RETEST",
+        "fix_template": "检查并安装缺失的依赖，或锁定到兼容版本",
+        "verification_required": [
+          "确认 requirements.txt 包含所需依赖",
+          "运行 pip install 确认无冲突"
+        ]
+      }
+    },
+    {
+      "signature_id": "sig-seed-003",
+      "created_at": "2026-01-01T00:00:00",
+      "last_matched": "2026-01-01T00:00:00",
+      "match_count": 0,
+      "feature_vector": {
+        "error_type": "AssertionError",
+        "error_message_hash": "ghi789jkl012",
+        "error_location_pattern": "",
+        "stack_trace_signature": [],
+        "change_context": {
+          "files_touched": [],
+          "change_types": ["logic_fix"],
+          "distance_to_error": "SAME_FILE"
+        },
+        "temporal": {
+          "is_new_in_this_diff": true,
+          "frequency_30d": 0
+        }
+      },
+      "diagnosis": {
+        "root_cause": "测试断言值与实际输出不匹配——代码行为改变了但测试预期未更新，或代码逻辑错误",
+        "root_cause_category": "logic_error",
+        "reliability": 0.6
+      },
+      "resolution": {
+        "strategy": "DIAGNOSE_AND_FIX",
+        "fix_template": "对比预期值和实际值，判断是代码逻辑错误还是测试预期需要更新",
+        "verification_required": [
+          "确认实际输出是否符合 Spec 预期",
+          "如果实际输出正确，更新测试；否则修复代码"
+        ]
+      }
+    },
+    {
+      "signature_id": "sig-seed-004",
+      "created_at": "2026-01-01T00:00:00",
+      "last_matched": "2026-01-01T00:00:00",
+      "match_count": 0,
+      "feature_vector": {
+        "error_type": "TypeError",
+        "error_message_hash": "jkl012mno345",
+        "error_location_pattern": "",
+        "stack_trace_signature": [],
+        "change_context": {
+          "files_touched": [],
+          "change_types": ["refactor"],
+          "distance_to_error": "SAME_FILE"
+        },
+        "temporal": {
+          "is_new_in_this_diff": true,
+          "frequency_30d": 0
+        }
+      },
+      "diagnosis": {
+        "root_cause": "函数调用参数类型或数量不匹配——签名变更未同步",
+        "root_cause_category": "refactor",
+        "reliability": 0.75
+      },
+      "resolution": {
+        "strategy": "FIX_AND_RETEST",
+        "fix_template": "检查函数签名变更，确保所有调用方传递正确的参数类型和数量",
+        "verification_required": [
+          "检查所有调用点的参数是否与新签名匹配",
+          "运行类型检查器"
+        ]
+      }
+    },
+    {
+      "signature_id": "sig-seed-005",
+      "created_at": "2026-01-01T00:00:00",
+      "last_matched": "2026-01-01T00:00:00",
+      "match_count": 0,
+      "feature_vector": {
+        "error_type": "KeyError",
+        "error_message_hash": "mno345pqr678",
+        "error_location_pattern": "",
+        "stack_trace_signature": [],
+        "change_context": {
+          "files_touched": [],
+          "change_types": ["config"],
+          "distance_to_error": "SAME_FILE"
+        },
+        "temporal": {
+          "is_new_in_this_diff": true,
+          "frequency_30d": 0
+        }
+      },
+      "diagnosis": {
+        "root_cause": "字典/配置键缺失——需要的配置项未被设置",
+        "root_cause_category": "config",
+        "reliability": 0.7
+      },
+      "resolution": {
+        "strategy": "FIX_AND_RETEST",
+        "fix_template": "确认配置文件中包含所需键，或添加默认值兜底",
+        "verification_required": [
+          "检查所有环境下的配置文件",
+          "添加配置缺失时的降级逻辑"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+# Code quality regression detection rules
+patterns:
+  - id: Q001
+    name: error_swallowed
+    desc: "Exception caught but not handled or logged"
+    severity: MEDIUM
+    detector:
+      type: ast_pattern
+      rule: "except block with empty body or bare pass"
+
+  - id: Q002
+    name: overly_broad_except
+    desc: "Bare 'except:' or 'except Exception:' without specific types"
+    severity: LOW
+    detector:
+      type: ast_pattern
+      rule: "bare except or except Exception without specific exception types"
+
+  - id: Q003
+    name: dependency_drift
+    desc: "New external dependency introduced without explicit version pinning"
+    severity: MEDIUM
+    detector:
+      type: file_diff
+      rule: "new entry in requirements.txt/Cargo.toml/package.json without version"
+
+  - id: Q004
+    name: commented_out_code
+    desc: "Blocks of commented-out code added — should be removed"
+    severity: LOW
+    detector:
+      type: pattern_match
+      rule: "5+ consecutive lines of commented-out code in diff"
+
+  - id: Q005
+    name: todo_without_ticket
+    desc: "TODO/FIXME comment without issue tracker reference"
+    severity: LOW
+    detector:
+      type: pattern_match
+      rule: "TODO|FIXME|HACK without issue/PR reference"

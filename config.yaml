@@ -1,0 +1,71 @@
+# DevHive Configuration
+api:
+  base_url: "https://aiapi.lejurobot.com"
+  auth_token: "${LEJU_TOKEN}"
+  default_model: "deepseek/deepseek-v4-pro"
+
+agents:
+  execute:
+    count: 2
+    max_context: 180000
+    timeout_seconds: 600
+    tools:
+      - read_file
+      - write_file
+      - edit_file
+      - bash
+      - git
+    sandbox:
+      file_whitelist: [".py", ".ts", ".js", ".rs", ".go", ".yaml", ".json", ".md", ".toml", ".cfg"]
+      forbidden_commands: ["rm -rf", "git push --force", "sudo", "chmod 777"]
+
+  static_verifier:
+    count: 1
+    max_context: 80000
+    timeout_seconds: 120
+    rules_dir: "verification/patterns/"
+
+  dynamic_verifier:
+    count: 1
+    max_context: 80000
+    timeout_seconds: 300
+    call_graph_db: "storage/call_graph.sqlite"
+    drift_thresholds:
+      duration_change_pct: 20
+      memory_change_pct: 50
+      log_volume_change_multiplier: 3.0
+
+  semantic_verifier:
+    count: 1
+    max_context: 120000
+    timeout_seconds: 180
+    trigger: "on_conflict_or_l2"
+
+convergence:
+  l1_max_retries: 3
+  l2_max_retries: 2
+  loop_detection_window: 5
+  loop_similarity_threshold: 0.8
+
+signature_db:
+  path: "signatures/signatures.db"
+  seed_file: "signatures/seed_signatures.json"
+  min_confidence: 0.65
+  top_k: 3
+  auto_learn: true
+
+escalation:
+  notify:
+    - type: "desktop_notification"
+    - type: "terminal_bell"
+  require_approval_for:
+    - auth
+    - payment
+    - data_deletion
+    - permission_change
+
+sandbox:
+  docker_image: "devhive-sandbox:latest"
+  memory_limit: "2g"
+  cpu_limit: 2
+  timeout_default: 600
