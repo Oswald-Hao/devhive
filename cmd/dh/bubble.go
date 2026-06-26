@@ -72,15 +72,23 @@ type apiClient struct {
 	model   string
 }
 
-func newAPIClient(modelName string) *apiClient {
-	if modelName == "" {
-		modelName = defaultModel
+func newAPIClient(modelName string) (*apiClient, error) {
+	c, err := api.NewClient("", "", modelName)
+	if err != nil {
+		return nil, err
+	}
+	usedModel := c.DefaultModel
+	if modelName != "" {
+		usedModel = modelName
+	}
+	if usedModel == "" {
+		usedModel = defaultModel
 	}
 	return &apiClient{
-		client:  api.NewClient("", "", modelName),
-		model:   modelName,
+		client:  c,
+		model:   usedModel,
 		history: []api.Message{},
-	}
+	}, nil
 }
 
 func sessionDir() string {

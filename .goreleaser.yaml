@@ -29,7 +29,7 @@ archives:
   - format: tar.gz
     name_template: "devhive-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     files:
-      - config.yaml
+      - config.example.yaml
       - install.sh
 
 checksum:

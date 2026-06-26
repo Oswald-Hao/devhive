@@ -1,6 +1,9 @@
-# Binary
-/dh
-/devhive
+# Build artifacts
+/build/
+/dist/
+
+# Config (user's local config, template is config.example.yaml)
+config.yaml
 
 # Go
 *.exe

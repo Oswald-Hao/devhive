@@ -8,23 +8,33 @@ import (
 	"github.com/Oswald-Hao/devhive/internal/api"
 )
 
+func newTestClient() *apiClient {
+	os.Setenv("ANTHROPIC_BASE_URL", "http://test.example.com")
+	os.Setenv("ANTHROPIC_AUTH_TOKEN", "test-token")
+	c, err := newAPIClient("")
+	if err != nil {
+		panic(err)
+	}
+	return c
+}
+
 func TestNewAPIClient(t *testing.T) {
-	c := newAPIClient("")
-	if c.model != defaultModel {
-		t.Errorf("default model should be %s, got %s", defaultModel, c.model)
+	c := newTestClient()
+	if c.model == "" {
+		t.Error("model should not be empty")
 	}
 	if len(c.history) != 0 {
 		t.Error("history should be empty")
 	}
 
-	c2 := newAPIClient("claude-sonnet-4-6")
+	c2, _ := newAPIClient("claude-sonnet-4-6")
 	if c2.model != "claude-sonnet-4-6" {
 		t.Errorf("model should be claude-sonnet-4-6, got %s", c2.model)
 	}
 }
 
 func TestApiClientHistoryTrim(t *testing.T) {
-	client := newAPIClient("")
+	client := newTestClient()
 	for i := 0; i < 11; i++ {
 		client.history = append(client.history,
 			api.Message{Role: "user", Content: "msg"},

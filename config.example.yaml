@@ -1,8 +1,13 @@
 # DevHive Configuration
+# Fill in your API credentials and customize settings.
+
 api:
-  base_url: "https://aiapi.lejurobot.com"
-  auth_token: "${LEJU_TOKEN}"
-  default_model: "deepseek/deepseek-v4-pro"
+  # Your API endpoint (required)
+  base_url: "https://api.example.com"
+  # Your API token (required)
+  auth_token: "your-token-here"
+  # Default model (optional, leave empty for API default)
+  default_model: ""
 
 agents:
   execute:

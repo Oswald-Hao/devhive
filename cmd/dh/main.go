@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Oswald-Hao/devhive/internal/api"
 	"github.com/Oswald-Hao/devhive/internal/tui"
 	"github.com/mattn/go-isatty"
 )
@@ -21,6 +22,7 @@ FLAGS:
   -h, --help        Show this help
   -v, --version     Show version
   -q, --quiet       Suppress non-essential output (banners, spinners)
+  --init            Generate ~/.devhive/config.yaml template
   --json            Output in JSON format (for scripting)
   --no-tui          Disable interactive TUI, read a single prompt from stdin
   --resume          Resume the last session from ~/.devhive/sessions/
@@ -30,6 +32,7 @@ EXAMPLES:
   dh                              Start interactive chat
   dh --help                       Show this help
   dh --version                    Print version and exit
+  dh --init                       Create config file template
   dh --resume                     Resume previous session
   dh --model claude-sonnet-4-6    Use a different model
   echo "explain Go interfaces" | dh --no-tui
@@ -45,6 +48,7 @@ func main() {
 	jsonOut := flag.Bool("json", false, "")
 	noTUI := flag.Bool("no-tui", false, "")
 	resume := flag.Bool("resume", false, "")
+	initConfig := flag.Bool("init", false, "")
 	model := flag.String("model", "", "")
 
 	flag.Usage = func() {
@@ -62,6 +66,11 @@ func main() {
 
 	if *showVersion || *showVersionShort {
 		fmt.Fprintf(os.Stdout, "DevHive v%s\n", version)
+		return
+	}
+
+	if *initConfig {
+		runInit()
 		return
 	}
 
@@ -105,6 +114,7 @@ func isKnownFlag(f string) bool {
 		"--no-tui": true,
 		"--resume": true,
 		"--model": true,
+		"--init":  true,
 	}
 	// --model=value or --model value are both fine
 	if strings.HasPrefix(f, "--model=") {
@@ -162,4 +172,13 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func runInit() {
+	if err := api.WriteDefaultConfig(); err != nil {
+		fmt.Fprintln(os.Stderr, tui.ErrorPrefix.Render()+" "+err.Error())
+		os.Exit(1)
+	}
+	fmt.Println(tui.SuccessPrefix.Render() + " Config template created at ~/.devhive/config.yaml")
+	fmt.Println("  Edit it to set your API credentials, then run 'dh' to start.")
 }

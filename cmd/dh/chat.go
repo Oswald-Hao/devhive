@@ -21,7 +21,11 @@ var spinnerFrames = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "�
 
 func runChat(modelName string, resume bool) {
 	// --- load state ---
-	client := newAPIClient(modelName)
+	client, err := newAPIClient(modelName)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, tui.ErrorPrefix.Render()+" "+err.Error())
+		os.Exit(1)
+	}
 	messages := []chatMsg{}
 
 	if resume {

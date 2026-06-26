@@ -21,7 +21,7 @@
   "files": [
     "bin/",
     "install.sh",
-    "config.yaml"
+    "config.example.yaml"
   ],
   "scripts": {
     "postinstall": "bash install.sh || echo 'DevHive: Install failed. You can manually run: bash $(npm root -g)/@oswaldzsh/devhive/install.sh'"

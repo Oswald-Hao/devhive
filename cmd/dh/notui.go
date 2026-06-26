@@ -28,7 +28,11 @@ func runNoTUI(modelName string, jsonOut bool, quiet bool, isTerminal bool) {
 		fmt.Fprintf(os.Stderr, "%s Sending prompt (%d chars)...\n", tui.InfoPrefix.Render(), len(prompt))
 	}
 
-	client := api.NewClient("", "", modelName)
+	client, err := api.NewClient("", "", modelName)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, tui.ErrorPrefix.Render()+" "+err.Error())
+		os.Exit(1)
+	}
 	system := systemPrompt
 	messages := []api.Message{{Role: "user", Content: prompt}}
 

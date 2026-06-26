@@ -5,16 +5,22 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
 
-const defaultBaseURL = "https://aiapi.lejurobot.com"
-const defaultModel = "deepseek/deepseek-v4-pro"
+// Config holds API configuration loaded from config file.
+type Config struct {
+	BaseURL   string
+	AuthToken string
+	Model     string
+}
 
 // Client is an async-friendly HTTP client for the Anthropic Messages API.
 type Client struct {
@@ -24,13 +30,18 @@ type Client struct {
 	HTTP         *http.Client
 }
 
-// NewClient creates a new API client from config or environment variables.
-func NewClient(baseURL, authToken, model string) *Client {
+// NewClient creates a new API client. Configuration priority:
+//  1. Function arguments (non-empty values)
+//  2. Environment variables (ANTHROPIC_BASE_URL, ANTHROPIC_AUTH_TOKEN, LEJU_TOKEN, DEVHIVE_MODEL)
+//  3. ~/.devhive/config.yaml
+func NewClient(baseURL, authToken, model string) (*Client, error) {
+	cfg, cfgErr := LoadConfig(configPath())
+
 	if baseURL == "" {
 		baseURL = os.Getenv("ANTHROPIC_BASE_URL")
 	}
-	if baseURL == "" {
-		baseURL = defaultBaseURL
+	if baseURL == "" && cfgErr == nil {
+		baseURL = cfg.BaseURL
 	}
 	if authToken == "" {
 		authToken = os.Getenv("ANTHROPIC_AUTH_TOKEN")
@@ -39,17 +50,24 @@ func NewClient(baseURL, authToken, model string) *Client {
 		authToken = os.Getenv("LEJU_TOKEN")
 	}
 	if authToken == "" {
-		// Fallback: read from ~/.devhive/token
 		if data, err := os.ReadFile(os.ExpandEnv("$HOME/.devhive/token")); err == nil {
 			authToken = strings.TrimSpace(string(data))
 		}
 	}
+	if authToken == "" && cfgErr == nil {
+		authToken = cfg.AuthToken
+	}
 	if model == "" {
 		model = os.Getenv("DEVHIVE_MODEL")
 	}
-	if model == "" {
-		model = defaultModel
+	if model == "" && cfgErr == nil {
+		model = cfg.Model
 	}
+
+	if baseURL == "" || authToken == "" {
+		return nil, errors.New("API configuration missing. Run 'dh --init' to create a config file, then edit ~/.devhive/config.yaml with your API credentials.")
+	}
+
 	return &Client{
 		BaseURL:      baseURL,
 		AuthToken:    authToken,
@@ -57,7 +75,102 @@ func NewClient(baseURL, authToken, model string) *Client {
 		HTTP: &http.Client{
 			Timeout: 600 * time.Second,
 		},
+	}, nil
+}
+
+func configPath() string {
+	return os.ExpandEnv("$HOME/.devhive/config.yaml")
+}
+
+// LoadConfig reads API configuration from a YAML file.
+// Only parses api.base_url, api.auth_token, api.default_model.
+func LoadConfig(path string) (Config, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return Config{}, err
 	}
+
+	var cfg Config
+	inAPI := false
+	for _, line := range strings.Split(string(data), "\n") {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" || strings.HasPrefix(trimmed, "#") {
+			continue
+		}
+		if trimmed == "api:" {
+			inAPI = true
+			continue
+		}
+		if !inAPI {
+			continue
+		}
+		// Exit api section when a non-indented key at top level appears
+		if !strings.HasPrefix(line, " ") && !strings.HasPrefix(line, "\t") {
+			inAPI = false
+			continue
+		}
+		key, val := parseYAMLKeyValue(trimmed)
+		switch key {
+		case "base_url":
+			cfg.BaseURL = val
+		case "auth_token":
+			cfg.AuthToken = val
+		case "default_model":
+			cfg.Model = val
+		}
+	}
+	return cfg, nil
+}
+
+// parseYAMLKeyValue parses a simple "key: value" or "key: "value"" line.
+// Also resolves ${ENV_VAR} references.
+func parseYAMLKeyValue(line string) (key, val string) {
+	idx := strings.Index(line, ":")
+	if idx < 0 {
+		return "", ""
+	}
+	key = strings.TrimSpace(line[:idx])
+	val = strings.TrimSpace(line[idx+1:])
+	// Strip surrounding quotes
+	if len(val) >= 2 && val[0] == '"' && val[len(val)-1] == '"' {
+		val = val[1 : len(val)-1]
+	}
+	// Resolve ${ENV_VAR}
+	if strings.HasPrefix(val, "${") && strings.HasSuffix(val, "}") {
+		envName := val[2 : len(val)-1]
+		val = os.Getenv(envName)
+	}
+	return key, val
+}
+
+// ConfigTemplate returns the content for a new config file.
+func ConfigTemplate() string {
+	return strings.TrimLeft(`
+# DevHive Configuration
+# Fill in your API credentials below.
+
+api:
+  # Your API endpoint (required)
+  base_url: "https://api.example.com"
+  # Your API token (required)
+  auth_token: "your-token-here"
+  # Default model (optional, leave empty for API default)
+  default_model: ""
+`, "\n")
+}
+
+// WriteDefaultConfig writes a config template to ~/.devhive/config.yaml.
+// Does not overwrite an existing file.
+func WriteDefaultConfig() error {
+	path := configPath()
+	if _, err := os.Stat(path); err == nil {
+		return fmt.Errorf("config already exists at %s", path)
+	}
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return err
+	}
+	return os.WriteFile(path, []byte(ConfigTemplate()), 0644)
 }
 
 // MessageRequest is the request body for creating a message.
