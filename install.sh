@@ -67,4 +67,4 @@ fi
 
 echo ""
 echo "DevHive v${VERSION} installed to $INSTALL_DIR/$BINARY"
-echo "Run 'dh' to start."
+echo "Run 'devhive' to start."
