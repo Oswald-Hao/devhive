@@ -92,9 +92,9 @@ for platform in "${platforms[@]}"; do
     binary="dh-${GOOS}-${GOARCH}"
     tarball="devhive-${VERSION}-${GOOS}-${GOARCH}.tar.gz"
 
-    cp "$BUILD_DIR/$binary" "$BUILD_DIR/dh"
-    tar -czf "$ARCHIVE_DIR/$tarball" -C "$BUILD_DIR" dh
-    rm "$BUILD_DIR/dh"
+    cp "$BUILD_DIR/$binary" "$BUILD_DIR/devhive"
+    tar -czf "$ARCHIVE_DIR/$tarball" -C "$BUILD_DIR" devhive
+    rm "$BUILD_DIR/devhive"
     echo "  ✓ $tarball"
 done
 

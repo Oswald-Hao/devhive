@@ -4,7 +4,7 @@
 
 set -e
 
-VERSION="${DEVHIVE_VERSION:-0.2.1}"
+VERSION="${DEVHIVE_VERSION:-0.2.2}"
 REPO="Oswald-Hao/devhive"
 INSTALL_DIR="$HOME/.devhive/bin"
 BINARY="devhive"
