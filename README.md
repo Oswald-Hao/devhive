@@ -71,15 +71,6 @@ devhive --init
 | `/model <name>` | Switch AI model |
 | `/save <file>` | Save conversation to file |
 | `/quit`, `/q` | Exit DevHive |
-| `/specify` | Create task specification |
-| `/execute` | Run the Execute Agent |
-| `/verify` | Trigger full verification |
-| `/merge` | Merge approved changes |
-| `/status` | Show pipeline state |
-| `/config` | View configuration |
-| `/checkpoint` | List or rollback checkpoints |
-| `/converge` | Force convergence check |
-| `/signature` | Show error pattern matches |
 
 ## CLI Flags
 

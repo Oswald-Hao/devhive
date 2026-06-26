@@ -223,9 +223,6 @@ func handleSlashCmd(input string, client *apiClient, messages *[]chatMsg, width 
 		} else {
 			content = tui.InfoPrefix.Render() + " Usage: /save <file>"
 		}
-	case "/specify", "/execute", "/verify", "/merge",
-		"/status", "/config", "/checkpoint", "/converge", "/signature":
-		content = tui.WarningPrefix.Render() + fmt.Sprintf(" %s: orchestrator not connected in CLI mode.", cmd)
 	default:
 		content = tui.WarningPrefix.Render() + " Unknown command: " + cmd + "\nType /help for available commands."
 	}
@@ -235,12 +232,7 @@ func handleSlashCmd(input string, client *apiClient, messages *[]chatMsg, width 
 }
 
 func printHeader(modelName string, width int) {
-	headerStyle := lipgloss.NewStyle().Foreground(tui.Primary).Bold(true)
-	dimStyle := lipgloss.NewStyle().Foreground(tui.Dim)
-
-	fmt.Println(headerStyle.Render("╭───── DevHive v" + version + " ─────") + dimStyle.Render(strings.Repeat("─", max(0, width-30))) + "╮")
-	fmt.Println(headerStyle.Render("│ ⬡") + "  " + dimStyle.Render(modelName) + strings.Repeat(" ", max(0, width-8-len(modelName))) + "│")
-	fmt.Println(dimStyle.Render("╰" + strings.Repeat("─", width-2) + "╯"))
+	fmt.Println(tui.RenderHeader(version, modelName, width))
 	fmt.Println()
 }
 
@@ -263,13 +255,6 @@ func historyBytes(messages []chatMsg, modelName string) []byte {
 	}
 	buf.WriteString(strings.Repeat("─", 60) + "\n")
 	return []byte(buf.String())
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }
 
 func termWidth() int {

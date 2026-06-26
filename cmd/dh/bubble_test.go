@@ -82,8 +82,8 @@ func TestRenderMsg(t *testing.T) {
 	if !strings.Contains(a, "hi") {
 		t.Error("assistant msg should contain content")
 	}
-	if !strings.Contains(a, "DevHive") {
-		t.Error("assistant msg should have DevHive label")
+	if !strings.Contains(a, "│") {
+		t.Error("assistant msg should have left bar prefix")
 	}
 
 	s := renderMsg(roleSystem, "note", 80)

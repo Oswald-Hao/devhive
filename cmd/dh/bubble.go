@@ -12,39 +12,15 @@ import (
 
 const defaultModel = "deepseek-v4-pro"
 
-const systemPrompt = `You are DevHive, a multi-agent software development system.
-
-DevHive's architecture:
-- **Orchestrator Engine**: central coordinator that manages task queues, agent pools, and event bus via goroutines and channels
-- **Pipeline**: SPECIFY → EXECUTE → VERIFY_L1 (static) → VERIFY_L2 (dynamic/semantic) → MERGE
-- **Execute Agent**: calls the AI model, produces code changes, outputs structured Handoff JSON
-- **Verifier Agents**: Static (rule engine), Dynamic (test runner), Semantic (spec alignment check)
-- **Convergence Gate**: loop detection and escalation
-- **Signature Engine**: Pure Go weighted similarity matching
-- **Checkpoint Store**: SQLite-based task state persistence
-- **Distribution**: single Go binary, zero runtime dependencies
-
-You are the chat interface for DevHive. Answer questions about DevHive's internals accurately. For general programming questions, be concise and provide working code over explanations.`
+const systemPrompt = `You are DevHive, a software development assistant. You help with coding, debugging, code review, and answering technical questions. Be concise. Prefer working code over long explanations. When you don't know something, say so.`
 
 const slashHelp = `Available Commands
 
-Chat:
   /help           Show this help
   /clear          Clear conversation history
   /model <name>   Switch AI model
   /save <file>    Save conversation to file
-  /quit, /q       Exit DevHive
-
-Pipeline:
-  /specify <desc> Create a task specification
-  /execute        Run the Execute Agent
-  /verify         Trigger full verification
-  /merge          Merge approved changes
-  /status         Show task queue and agent pool state
-  /config         View current configuration
-  /checkpoint     List or rollback to checkpoints
-  /converge       Force convergence check
-  /signature      Show error pattern matches`
+  /quit, /q       Exit DevHive`
 
 type msgRole string
 

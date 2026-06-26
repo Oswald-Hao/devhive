@@ -146,18 +146,6 @@ var (
 			BorderForeground(Primary).
 			Padding(0, 1)
 
-	// UserLabel is the "You" tag on user bubbles.
-	UserLabel = lipgloss.NewStyle().
-			Foreground(Primary).
-			Bold(true).
-			Padding(0, 1)
-
-	// AssistBar is the left colored bar for assistant messages.
-	AssistBar = lipgloss.NewStyle().
-			Foreground(Highlight).
-			Bold(true).
-			SetString("│")
-
 	// SystemBubble wraps system messages in a dim border.
 	SystemBubble = lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
@@ -202,40 +190,59 @@ func FormatHelpBox(title, content string) string {
 	return header + "\n" + HelpBoxStyle.Render(content)
 }
 
-// RenderUserMsg renders a user message in a bubble.
-func RenderUserMsg(content string, width int) string {
-	label := UserLabel.Render("You")
-	body := UserBubble.Copy().Width(width - 4).Render(content)
-	return label + "\n" + body
+// messageWidth returns the width for message content, capped at 80.
+func messageWidth(termWidth int) int {
+	w := termWidth - 4
+	if w > 80 {
+		return 80
+	}
+	if w < 20 {
+		return 20
+	}
+	return w
 }
 
-// RenderAssistMsg renders an assistant message with a left bar prefix.
+// RenderUserMsg renders a user message in a cyan bubble with "You" in the top border.
+func RenderUserMsg(content string, width int) string {
+	w := messageWidth(width)
+	b := lipgloss.NewStyle().
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(Primary).
+		Padding(0, 1).
+		Width(w)
+	// Build top border with " You " label
+	label := lipgloss.NewStyle().Foreground(Primary).Bold(true).Render(" You ")
+	top := "╭─" + label + strings.Repeat("─", max(0, w+2-lipgloss.Width(label)-2)) + "╮"
+	body := b.Render(content)
+	// Replace the default top border line with our labeled one
+	lines := strings.Split(body, "\n")
+	lines[0] = top
+	return strings.Join(lines, "\n")
+}
+
+// RenderAssistMsg renders an assistant message with a colored left bar.
 func RenderAssistMsg(content string, width int) string {
-	label := lipgloss.NewStyle().Foreground(Highlight).Bold(true).Render("DevHive")
-	barWidth := lipgloss.Width(AssistBar.String())
-	bodyWidth := width - barWidth - 4
-	if bodyWidth < 10 {
-		bodyWidth = 10
-	}
+	w := messageWidth(width)
+	bar := lipgloss.NewStyle().Foreground(Highlight).SetString("│").String()
+	body := lipgloss.NewStyle().Width(w).Padding(0, 1).Render(content)
 	var b strings.Builder
-	b.WriteString(label + "\n")
-	for _, line := range strings.Split(content, "\n") {
-		b.WriteString(AssistBar.String() + " " + DimStyle.Copy().Width(bodyWidth).Render(line) + "\n")
+	for _, line := range strings.Split(body, "\n") {
+		b.WriteString(bar + " " + line + "\n")
 	}
-	return b.String()
+	return strings.TrimSuffix(b.String(), "\n")
 }
 
 // RenderSystemMsg renders a system message in a dim-bordered panel.
 func RenderSystemMsg(content string, width int) string {
-	return SystemBubble.Copy().Width(width - 4).Render(content)
+	w := messageWidth(width)
+	return SystemBubble.Copy().Width(w).Render(content)
 }
 
 // RenderHeader builds the top bar.
 func RenderHeader(version, model string, width int) string {
 	left := BannerStyle.Render("⬡") + " " + BannerStyle.Render("DevHive")
 	right := DimStyle.Render("v" + version + " · " + model)
-	// right-align the version/model info
-	innerWidth := width - 6 // account for border+padding
+	innerWidth := width - 6
 	leftW := lipgloss.Width(left)
 	rightW := lipgloss.Width(right)
 	spacer := innerWidth - leftW - rightW
@@ -259,4 +266,11 @@ func RenderFooter(width, msgCount int, model string) string {
 	}
 	content := left + strings.Repeat(" ", spacer) + right
 	return FooterStyle.Copy().Width(width - 2).Render(content)
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
