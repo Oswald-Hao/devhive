@@ -1,127 +1,165 @@
-// Package dh provides the DevHive CLI — a conversational multi-agent development system.
 package main
 
 import (
-	"bufio"
+	"flag"
 	"fmt"
 	"os"
-	"os/exec"
-	"os/signal"
 	"strings"
-	"syscall"
 
 	"github.com/Oswald-Hao/devhive/internal/tui"
+	"github.com/mattn/go-isatty"
 )
 
 const version = "0.2.0"
 
-var banner = tui.BannerStyle.Render("  DevHive") +
-	tui.DimStyle.Render("  multi-agent coding  ·  /help  ·  Ctrl+C to quit")
+const helpText = `DevHive — multi-agent software development assistant.
+
+USAGE:
+  dh [flags]
+
+FLAGS:
+  -h, --help        Show this help
+  -v, --version     Show version
+  -q, --quiet       Suppress non-essential output (banners, spinners)
+  --json            Output in JSON format (for scripting)
+  --no-tui          Disable interactive TUI, read a single prompt from stdin
+  --resume          Resume the last session from ~/.devhive/sessions/
+  --model <name>    Override AI model (default: deepseek-v4-pro)
+
+EXAMPLES:
+  dh                              Start interactive chat
+  dh --help                       Show this help
+  dh --version                    Print version and exit
+  dh --resume                     Resume previous session
+  dh --model claude-sonnet-4-6    Use a different model
+  echo "explain Go interfaces" | dh --no-tui
+  dh --no-tui --json <<< "what is DevHive?"`
 
 func main() {
-	if len(os.Args) > 1 {
-		runOneShot()
+	help := flag.Bool("help", false, "")
+	helpShort := flag.Bool("h", false, "")
+	showVersion := flag.Bool("version", false, "")
+	showVersionShort := flag.Bool("v", false, "")
+	quiet := flag.Bool("quiet", false, "")
+	quietShort := flag.Bool("q", false, "")
+	jsonOut := flag.Bool("json", false, "")
+	noTUI := flag.Bool("no-tui", false, "")
+	resume := flag.Bool("resume", false, "")
+	model := flag.String("model", "", "")
+
+	flag.Usage = func() {
+		fmt.Fprint(os.Stdout, helpText+"\n")
+	}
+
+	// Custom flag parsing to handle unknown flags gracefully
+	args := os.Args[1:]
+	flag.CommandLine.Parse(args)
+
+	if *help || *helpShort {
+		fmt.Fprint(os.Stdout, helpText+"\n")
 		return
 	}
-	runREPL()
-}
 
-func runOneShot() {
-	fmt.Println("One-shot commands coming soon. Use interactive mode: dh")
-	os.Exit(0)
-}
-
-func runREPL() {
-	fmt.Println(banner)
-	fmt.Println()
-
-	ctx := NewContext()
-	defer ctx.Engine.Stop()
-
-	reader := bufio.NewReader(os.Stdin)
-
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		<-sigCh
-		fmt.Println()
-		os.Exit(0)
-	}()
-
-	for {
-		fmt.Print(tui.PromptStyle.Render("❯ "))
-
-		input, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Println()
-			break
-		}
-
-		line := strings.TrimSpace(input)
-		if line == "" {
-			continue
-		}
-
-		dispatch(ctx, line)
-	}
-}
-
-func dispatch(ctx *Context, line string) {
-	switch {
-	case strings.HasPrefix(line, "!"):
-		runShell(strings.TrimSpace(line[1:]))
-
-	case strings.HasPrefix(line, "/"):
-		parts := strings.Fields(line)
-		cmd := strings.ToLower(strings.TrimPrefix(parts[0], "/"))
-		args := parts[1:]
-
-		switch cmd {
-		case "help", "h":
-			showHelp()
-		case "quit", "q", "exit":
-			fmt.Println()
-			os.Exit(0)
-		case "status", "st":
-			showStatus(ctx)
-		case "tasks", "t":
-			showTasks(ctx)
-		case "log", "l":
-			if len(args) > 0 {
-				showLog(ctx, args[0])
-			} else {
-				fmt.Println(tui.DimStyle.Render("  Usage: /log <task-id>"))
-			}
-		case "review", "rv":
-			showReview(ctx)
-		case "resolve", "rs":
-			if len(args) > 0 {
-				resolveEscalation(ctx, args[0])
-			} else {
-				fmt.Println(tui.DimStyle.Render("  Usage: /resolve <escalation-id>"))
-			}
-		case "clear":
-			fmt.Print("\033[2J\033[H")
-			fmt.Println(banner)
-			fmt.Println()
-		default:
-			fmt.Println(tui.DimStyle.Render(fmt.Sprintf("  Unknown: /%s  (use /help)", cmd)))
-		}
-
-	default:
-		submitTask(ctx, line)
-	}
-}
-
-func runShell(cmd string) {
-	if cmd == "" {
+	if *showVersion || *showVersionShort {
+		fmt.Fprintf(os.Stdout, "DevHive v%s\n", version)
 		return
 	}
-	c := exec.Command("bash", "-c", cmd)
-	c.Stdout = os.Stdout
-	c.Stderr = os.Stderr
-	c.Stdin = os.Stdin
-	if err := c.Run(); err != nil {
-		fmt.Println(tui.ErrorStyle.Render(fmt.Sprintf("  %v", err)))
+
+	// Check for unknown flags
+	for _, a := range args {
+		if strings.HasPrefix(a, "-") && !isKnownFlag(a) {
+			suggestion := findClosestFlag(a)
+			msg := tui.ErrorPrefix.Render() + " Unknown flag: " + a
+			if suggestion != "" {
+				msg += "\n   Did you mean " + suggestion + "?"
+			}
+			msg += "\n   Run 'dh --help' for usage."
+			fmt.Fprintln(os.Stderr, msg)
+			os.Exit(1)
+		}
 	}
+
+	// Detect TTY
+	isTerminal := isatty.IsTerminal(os.Stdout.Fd())
+
+	// --no-tui mode: single prompt from stdin
+	if *noTUI {
+		runNoTUI(*model, *jsonOut, *quiet || *quietShort, isTerminal)
+		return
+	}
+
+	// Default: interactive TUI
+	if !isTerminal && !*quiet && !*quietShort {
+		fmt.Fprintln(os.Stderr, tui.WarningPrefix.Render()+" stdout is not a terminal; TUI may not work correctly. Use --no-tui for scripted input.")
+	}
+
+	runChat(*model, *resume)
+}
+
+func isKnownFlag(f string) bool {
+	known := map[string]bool{
+		"--help": true, "-h": true,
+		"--version": true, "-v": true,
+		"--quiet": true, "-q": true,
+		"--json": true,
+		"--no-tui": true,
+		"--resume": true,
+		"--model": true,
+	}
+	// --model=value or --model value are both fine
+	if strings.HasPrefix(f, "--model=") {
+		return true
+	}
+	return known[f]
+}
+
+func findClosestFlag(input string) string {
+	known := []string{"--help", "--version", "--quiet", "--json", "--no-tui", "--resume", "--model"}
+	best := ""
+	bestDist := 3 // threshold
+	input = strings.TrimLeft(input, "-")
+	for _, k := range known {
+		kTrim := strings.TrimLeft(k, "-")
+		d := levenshtein(input, kTrim)
+		if d < bestDist {
+			bestDist = d
+			best = k
+		}
+	}
+	return best
+}
+
+func levenshtein(a, b string) int {
+	al, bl := len(a), len(b)
+	if al == 0 {
+		return bl
+	}
+	if bl == 0 {
+		return al
+	}
+	dp := make([][]int, al+1)
+	for i := range dp {
+		dp[i] = make([]int, bl+1)
+		dp[i][0] = i
+	}
+	for j := 0; j <= bl; j++ {
+		dp[0][j] = j
+	}
+	for i := 1; i <= al; i++ {
+		for j := 1; j <= bl; j++ {
+			cost := 1
+			if a[i-1] == b[j-1] {
+				cost = 0
+			}
+			dp[i][j] = min(dp[i-1][j]+1, min(dp[i][j-1]+1, dp[i-1][j-1]+cost))
+		}
+	}
+	return dp[al][bl]
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

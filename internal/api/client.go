@@ -38,6 +38,12 @@ func NewClient(baseURL, authToken, model string) *Client {
 	if authToken == "" {
 		authToken = os.Getenv("LEJU_TOKEN")
 	}
+	if authToken == "" {
+		// Fallback: read from ~/.devhive/token
+		if data, err := os.ReadFile(os.ExpandEnv("$HOME/.devhive/token")); err == nil {
+			authToken = strings.TrimSpace(string(data))
+		}
+	}
 	if model == "" {
 		model = os.Getenv("DEVHIVE_MODEL")
 	}
