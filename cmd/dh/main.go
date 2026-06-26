@@ -11,12 +11,12 @@ import (
 	"github.com/mattn/go-isatty"
 )
 
-const version = "0.2.0"
+const version = "0.2.1"
 
 const helpText = `DevHive — multi-agent software development assistant.
 
 USAGE:
-  dh [flags]
+  devhive [flags]
 
 FLAGS:
   -h, --help        Show this help
@@ -29,14 +29,14 @@ FLAGS:
   --model <name>    Override AI model (default: deepseek-v4-pro)
 
 EXAMPLES:
-  dh                              Start interactive chat
-  dh --help                       Show this help
-  dh --version                    Print version and exit
-  dh --init                       Create config file template
-  dh --resume                     Resume previous session
-  dh --model claude-sonnet-4-6    Use a different model
-  echo "explain Go interfaces" | dh --no-tui
-  dh --no-tui --json <<< "what is DevHive?"`
+  devhive                              Start interactive chat
+  devhive --help                       Show this help
+  devhive --version                    Print version and exit
+  devhive --init                       Create config file template
+  devhive --resume                     Resume previous session
+  devhive --model claude-sonnet-4-6    Use a different model
+  echo "explain Go interfaces" | devhive --no-tui
+  devhive --no-tui --json <<< "what is DevHive?"`
 
 func main() {
 	help := flag.Bool("help", false, "")
@@ -82,7 +82,7 @@ func main() {
 			if suggestion != "" {
 				msg += "\n   Did you mean " + suggestion + "?"
 			}
-			msg += "\n   Run 'dh --help' for usage."
+			msg += "\n   Run 'devhive --help' for usage."
 			fmt.Fprintln(os.Stderr, msg)
 			os.Exit(1)
 		}
@@ -180,5 +180,5 @@ func runInit() {
 		os.Exit(1)
 	}
 	fmt.Println(tui.SuccessPrefix.Render() + " Config template created at ~/.devhive/config.yaml")
-	fmt.Println("  Edit it to set your API credentials, then run 'dh' to start.")
+	fmt.Println("  Edit it to set your API credentials, then run 'devhive' to start.")
 }

@@ -113,8 +113,8 @@ cp "$ROOT/package.json" "$NPM_DIR/"
 cp "$ROOT/install.sh" "$NPM_DIR/"
 cp "$ROOT/config.example.yaml" "$NPM_DIR/"
 
-# Create the bin/dh wrapper (same as current but with updated find logic)
-cp "$ROOT/bin/dh" "$NPM_DIR/bin/dh"
+# Create the bin/devhive wrapper
+cp "$ROOT/bin/devhive" "$NPM_DIR/bin/devhive"
 
 echo "  ✓ npm package prepared in build/npm/"
 

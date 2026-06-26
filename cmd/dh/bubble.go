@@ -137,7 +137,7 @@ func formatAPIError(errText string) string {
 	case strings.Contains(lower, "500") || strings.Contains(lower, "502") || strings.Contains(lower, "503"):
 		return tui.HumanError("API server error", errText, "the server is temporarily unavailable; try again in a few moments")
 	default:
-		return tui.HumanError("API request failed", errText, "run 'dh --help' for usage information")
+		return tui.HumanError("API request failed", errText, "run 'devhive --help' for usage information")
 	}
 }
 

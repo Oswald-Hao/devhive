@@ -1,6 +1,6 @@
 {
   "name": "@oswaldzsh/devhive",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Multi-Agent Software Development System — autonomous coding with verify-specialized agents, failure signatures, and structured handoff protocols.",
   "keywords": [
     "ai",
@@ -16,7 +16,7 @@
   "homepage": "https://github.com/Oswald-Hao/devhive",
   "license": "MIT",
   "bin": {
-    "dh": "bin/dh"
+    "devhive": "bin/devhive"
   },
   "files": [
     "bin/",

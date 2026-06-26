@@ -32,7 +32,7 @@ npm install -g @oswaldzsh/devhive
 ```bash
 git clone https://github.com/Oswald-Hao/devhive.git
 cd devhive
-go build -o ~/.devhive/bin/dh ./cmd/dh/
+go build -o ~/.devhive/bin/devhive ./cmd/dh/
 export PATH="$HOME/.devhive/bin:$PATH"
 ```
 
@@ -43,19 +43,19 @@ Download the latest binary for your platform from [Releases](https://github.com/
 ## Quick Start
 
 ```bash
-dh --init                        # Create ~/.devhive/config.yaml
+devhive --init                        # Create ~/.devhive/config.yaml
 # Edit ~/.devhive/config.yaml with your API credentials
-dh                  # Start interactive chat
-dh --help           # Show all flags
-dh --resume         # Resume last session
-echo "explain Go interfaces" | dh --no-tui        # Single question
-echo '{"task":"add login"}' | dh --no-tui --json  # JSON output
+devhive                  # Start interactive chat
+devhive --help           # Show all flags
+devhive --resume         # Resume last session
+echo "explain Go interfaces" | devhive --no-tui        # Single question
+echo '{"task":"add login"}' | devhive --no-tui --json  # JSON output
 ```
 
 Set your API credentials:
 
 ```bash
-dh --init
+devhive --init
 # Then edit ~/.devhive/config.yaml:
 #   api:
 #     base_url: "https://your-api.example.com"
@@ -85,11 +85,12 @@ dh --init
 
 ```
 USAGE:
-  dh [flags]
+  devhive [flags]
 
 FLAGS:
   -h, --help        Show help
   -v, --version     Show version
+  --init            Generate ~/.devhive/config.yaml template
   --json            Output in JSON format
   --no-tui          Read a single prompt from stdin
   --resume          Resume the last session
@@ -98,7 +99,7 @@ FLAGS:
 
 ## Configuration
 
-DevHive reads configuration from `~/.devhive/config.yaml`. Run `dh --init` to create a template.
+DevHive reads configuration from `~/.devhive/config.yaml`. Run `devhive --init` to create a template.
 
 | Setting | Description |
 |---------|-------------|

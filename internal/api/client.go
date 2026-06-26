@@ -65,7 +65,7 @@ func NewClient(baseURL, authToken, model string) (*Client, error) {
 	}
 
 	if baseURL == "" || authToken == "" {
-		return nil, errors.New("API configuration missing. Run 'dh --init' to create a config file, then edit ~/.devhive/config.yaml with your API credentials.")
+		return nil, errors.New("API configuration missing. Run 'devhive --init' to create a config file, then edit ~/.devhive/config.yaml with your API credentials.")
 	}
 
 	return &Client{

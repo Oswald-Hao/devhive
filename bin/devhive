@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# dh — DevHive CLI (Go binary)
+# devhive — DevHive CLI (Go binary)
 set -e
 
 # Resolve the Go binary
 find_binary() {
-    if [ -n "$DEVHIVE_HOME" ] && [ -x "$DEVHIVE_HOME/bin/dh.bin" ]; then
-        echo "$DEVHIVE_HOME/bin/dh.bin"
+    if [ -n "$DEVHIVE_HOME" ] && [ -x "$DEVHIVE_HOME/bin/devhive.bin" ]; then
+        echo "$DEVHIVE_HOME/bin/devhive.bin"
         return
     fi
-    if [ -x "$HOME/.devhive/bin/dh" ]; then
-        echo "$HOME/.devhive/bin/dh"
+    if [ -x "$HOME/.devhive/bin/devhive" ]; then
+        echo "$HOME/.devhive/bin/devhive"
         return
     fi
     SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-    if [ -x "$SCRIPT_DIR/dh.bin" ]; then
-        echo "$SCRIPT_DIR/dh.bin"
+    if [ -x "$SCRIPT_DIR/devhive.bin" ]; then
+        echo "$SCRIPT_DIR/devhive.bin"
         return
     fi
     echo ""
